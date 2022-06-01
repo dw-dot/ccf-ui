@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Injector, OnInit, ViewChild } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CCFDatabaseOptions, OntologyTreeModel } from 'ccf-database';
 import { DataSourceService, GlobalConfigState, TrackingPopupComponent } from 'ccf-shared';
@@ -16,6 +17,7 @@ import { ListResultsState } from './core/store/list-results/list-results.state';
 import { SceneState } from './core/store/scene/scene.state';
 import { FiltersPopoverComponent } from './modules/filters/filters-popover/filters-popover.component';
 import { DrawerComponent } from './shared/components/drawer/drawer/drawer.component';
+import { NewFeaturePopupComponent } from './shared/components/new-feature-popup/new-feature-popup.component';
 
 
 interface AppOptions extends CCFDatabaseOptions {
@@ -106,7 +108,8 @@ export class AppComponent implements OnInit {
     readonly data: DataState, readonly theming: ThemingService,
     readonly scene: SceneState, readonly listResultsState: ListResultsState,
     readonly consentService: ConsentService, readonly snackbar: MatSnackBar, overlay: AppRootOverlayContainer,
-    readonly dataSource: DataSourceService, private readonly globalConfig: GlobalConfigState<AppOptions>, cdr: ChangeDetectorRef
+    readonly dataSource: DataSourceService, private readonly globalConfig: GlobalConfigState<AppOptions>, cdr: ChangeDetectorRef,
+    public dialog: MatDialog
   ) {
     theming.initialize(el, injector);
     overlay.setRootElement(el);
@@ -133,6 +136,8 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.dialog.open(NewFeaturePopupComponent);
+
     const snackBar = this.snackbar.openFromComponent(TrackingPopupComponent, {
       data: {
         preClose: () => {

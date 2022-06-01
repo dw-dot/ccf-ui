@@ -1,0 +1,29 @@
+@use '~@angular/material' as mat;
+@use '~@angular/material/theming' as *;
+
+@mixin theme($theme) {
+  $primary: map-get($theme, primary);
+  $foreground: map-get($theme, foreground);
+  $background: map-get($theme, background);
+  $accent: map-get($theme, accent);
+
+  .ccf-new-feature-popup {
+
+    .close {
+      &:hover {
+        background-color: mat.get-color-from-palette($foreground, icons-background-hover) !important;
+      }
+    }
+    .more-button {
+      color: mat.get-color-from-palette($foreground, light-button-text);
+      background-color: mat.get-color-from-palette($background, button-bg);
+      border-color: mat.get-color-from-palette($foreground, button-border);
+  
+      &:hover {
+        color: mat.get-color-from-palette($foreground, color-hover);
+        background-color: mat.get-color-from-palette($background, button-background-hover);
+      }
+    }
+  }
+
+}

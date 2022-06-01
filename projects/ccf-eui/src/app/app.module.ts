@@ -40,7 +40,7 @@ import { AppWebComponent } from './app-web-component.component';
     MatTooltipModule,
     ViewerModule,
     TrackingPopupModule,
-    MatSnackBarModule
+    MatSnackBarModule,
   ],
   declarations: [AppComponent, AppWebComponent],
   providers: [
