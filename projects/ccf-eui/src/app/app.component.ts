@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Injector, OnInit, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { CCFDatabaseOptions, OntologyTreeModel } from 'ccf-database';
-import { DataSourceService, GlobalConfigState, TrackingPopupComponent } from 'ccf-shared';
+import { CCFDatabaseOptions, OntologyTreeModel, SpatialSearch } from 'ccf-database';
+import { DataSourceService, GlobalConfigState, SpatialSearchListItem, TrackingPopupComponent } from 'ccf-shared';
 import { ConsentService } from 'ccf-shared/analytics';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { map, pluck, shareReplay } from 'rxjs/operators';
@@ -85,6 +85,8 @@ export class AppComponent implements OnInit {
   readonly ontologyTerms$: Observable<readonly string[]>;
   readonly ontologyTreeModel$: Observable<OntologyTreeModel>;
 
+  readonly spatialSearchFilterData$: Observable<readonly SpatialSearch[]>;
+
   readonly cellTypeTerms$: Observable<readonly string[]>;
   readonly cellTypeTreeModel$: Observable<OntologyTreeModel>;
 
@@ -119,6 +121,7 @@ export class AppComponent implements OnInit {
     data.technologyFilterData$.subscribe();
     data.providerFilterData$.subscribe();
     this.ontologyTerms$ = data.filter$.pipe(pluck('ontologyTerms'));
+    this.spatialSearchFilterData$ = data.filter$.pipe(pluck('spatialSearches'));
 
     combineLatest([this.theme$, this.themeMode$]).subscribe(
       ([theme, mode]) => {
@@ -283,5 +286,47 @@ export class AppComponent implements OnInit {
   get loggedIn(): boolean {
     const token = this.globalConfig.snapshot.hubmapToken ?? '';
     return token.length > 0;
+  }
+
+  convertSpatialSearch(search: SpatialSearch): SpatialSearchListItem {
+    return {
+      selected: true,
+      description: `${search.sex}, ${search.organ}, ${search.radius/10} cm, X: ${search.x}, Y: ${search.y}, Z: ${search.z}`
+    };
+  }
+
+  convertAllSpatialSearches(searches: readonly SpatialSearch[] | null): SpatialSearchListItem[] {
+    return searches ? searches.map((search) => this.convertSpatialSearch(search)) : [];
+  }
+
+  // convertSpatialSearchListItem(search: SpatialSearchListItem): SpatialSearch {
+  //   const spatialSearchValues = search.description.split(', ');
+  //   return {
+  //     sex: spatialSearchValues[0],
+  //     organ: spatialSearchValues[1],
+  //     radius: Number(spatialSearchValues[2]) * 10,
+  //     x: Number(spatialSearchValues[3].replace('X: ', '')),
+  //     y: Number(spatialSearchValues[4].replace('Y: ', '')),
+  //     z: Number(spatialSearchValues[5].replace('Z: ', '')),
+  //     target: 'a'
+  //   };
+  // }
+
+  removeSpatialSearch(searchItem: SpatialSearchListItem): void {
+    console.log(searchItem)
+    let spatialSearchValues = searchItem.description.split(', ');
+    if (spatialSearchValues[2] === 'R' || spatialSearchValues[2] === 'L') {
+      spatialSearchValues[2] = spatialSearchValues[1] + ', ' + spatialSearchValues[2];
+      spatialSearchValues = [spatialSearchValues[0]].concat(spatialSearchValues.splice(2));
+    }
+    const spatialSearchList = this.data.snapshot.filter.spatialSearches;
+    console.log(spatialSearchList)
+    console.log(spatialSearchValues)
+    const newList = [...spatialSearchList].filter((search) => spatialSearchValues[1] !== search.organ);
+    console.log(newList)
+    this.data.updateFilter({
+      spatialSearches: newList
+    });
+    console.log(this.data.snapshot.filter);
   }
 }

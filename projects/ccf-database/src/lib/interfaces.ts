@@ -111,6 +111,8 @@ export interface SpatialSearch {
   radius: number;
   /** The target spatial entity IRI */
   target: string;
+  sex?: string;
+  organ?: string;
 }
 
 /** Options applied during queries */
