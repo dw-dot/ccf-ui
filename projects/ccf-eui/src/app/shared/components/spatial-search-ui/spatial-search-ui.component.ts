@@ -29,9 +29,8 @@ export class SpatialSearchUiComponent {
       y: 0,
       z: 0,
       radius: 100,
-      target: 'http://purl.obolibrary.org/obo/UBERON_0000948',
-      sex: this.sex,
-      organ: this.referenceOrgan.name
+      target: this.referenceOrgan.id ?? '',
+      sex: this.sex
     };
     this.spatialSearchChange.emit(newSearch);
   }

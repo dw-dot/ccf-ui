@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Injector, OnInit, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CCFDatabaseOptions, OntologyTreeModel, SpatialSearch } from 'ccf-database';
-import { DataSourceService, GlobalConfigState, SpatialSearchListItem, TrackingPopupComponent } from 'ccf-shared';
+import { ALL_ORGANS, DataSourceService, GlobalConfigState, OrganInfo, SpatialSearchListItem, TrackingPopupComponent } from 'ccf-shared';
 import { ConsentService } from 'ccf-shared/analytics';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { map, pluck, shareReplay } from 'rxjs/operators';
@@ -14,6 +14,7 @@ import { ThemingService } from './core/services/theming/theming.service';
 import { DataQueryState, DataState } from './core/store/data/data.state';
 import { ListResultsState } from './core/store/list-results/list-results.state';
 import { SceneState } from './core/store/scene/scene.state';
+import { SpatialSearchUiSelectors } from './core/store/spatial-search-ui/spatial-search-ui.selectors';
 import { FiltersPopoverComponent } from './modules/filters/filters-popover/filters-popover.component';
 import { DrawerComponent } from './shared/components/drawer/drawer/drawer.component';
 
@@ -289,9 +290,10 @@ export class AppComponent implements OnInit {
   }
 
   convertSpatialSearch(search: SpatialSearch): SpatialSearchListItem {
+    const organ = ALL_ORGANS.find((o) => o.id === search.target);
     return {
       selected: true,
-      description: `${search.sex}, ${search.organ}, ${search.radius/10} cm, X: ${search.x}, Y: ${search.y}, Z: ${search.z}`
+      description: `${search.sex}, ${organ?.name}, ${search.radius/10} cm, X: ${search.x}, Y: ${search.y}, Z: ${search.z}`
     };
   }
 
@@ -299,34 +301,16 @@ export class AppComponent implements OnInit {
     return searches ? searches.map((search) => this.convertSpatialSearch(search)) : [];
   }
 
-  // convertSpatialSearchListItem(search: SpatialSearchListItem): SpatialSearch {
-  //   const spatialSearchValues = search.description.split(', ');
-  //   return {
-  //     sex: spatialSearchValues[0],
-  //     organ: spatialSearchValues[1],
-  //     radius: Number(spatialSearchValues[2]) * 10,
-  //     x: Number(spatialSearchValues[3].replace('X: ', '')),
-  //     y: Number(spatialSearchValues[4].replace('Y: ', '')),
-  //     z: Number(spatialSearchValues[5].replace('Z: ', '')),
-  //     target: 'a'
-  //   };
-  // }
-
   removeSpatialSearch(searchItem: SpatialSearchListItem): void {
-    console.log(searchItem)
     let spatialSearchValues = searchItem.description.split(', ');
     if (spatialSearchValues[2] === 'R' || spatialSearchValues[2] === 'L') {
       spatialSearchValues[2] = spatialSearchValues[1] + ', ' + spatialSearchValues[2];
       spatialSearchValues = [spatialSearchValues[0]].concat(spatialSearchValues.splice(2));
     }
     const spatialSearchList = this.data.snapshot.filter.spatialSearches;
-    console.log(spatialSearchList)
-    console.log(spatialSearchValues)
-    const newList = [...spatialSearchList].filter((search) => spatialSearchValues[1] !== search.organ);
-    console.log(newList)
+    const newList = [...spatialSearchList].filter((search) => spatialSearchValues[1] !== search.target);
     this.data.updateFilter({
       spatialSearches: newList
     });
-    console.log(this.data.snapshot.filter);
   }
 }

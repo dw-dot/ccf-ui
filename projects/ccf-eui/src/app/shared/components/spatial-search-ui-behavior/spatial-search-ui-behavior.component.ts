@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
-import { SpatialSearch } from 'ccf-database';
 import { DataState } from '../../../core/store/data/data.state';
 import { SpatialSearchUiComponent } from '../spatial-search-ui/spatial-search-ui.component';
 import { Select } from '@ngxs/store';
@@ -8,6 +7,7 @@ import { Observable } from 'rxjs';
 import { SpatialSearchUiSelectors } from '../../../core/store/spatial-search-ui/spatial-search-ui.selectors';
 import { OrganInfo } from 'ccf-shared';
 import { Sex } from '../spatial-search-config/spatial-search-config.component';
+import { SpatialSearch } from 'ccf-database';
 
 
 @Component({
