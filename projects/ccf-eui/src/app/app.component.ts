@@ -3,6 +3,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { CCFDatabaseOptions, OntologyTreeModel, SpatialSearch } from 'ccf-database';
 import { ALL_ORGANS, DataSourceService, GlobalConfigState, OrganInfo, SpatialSearchListItem, TrackingPopupComponent } from 'ccf-shared';
 import { ConsentService } from 'ccf-shared/analytics';
+import { Store } from '@ngxs/store';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { map, pluck, shareReplay } from 'rxjs/operators';
 
@@ -14,7 +15,6 @@ import { ThemingService } from './core/services/theming/theming.service';
 import { DataQueryState, DataState } from './core/store/data/data.state';
 import { ListResultsState } from './core/store/list-results/list-results.state';
 import { SceneState } from './core/store/scene/scene.state';
-import { SpatialSearchUiSelectors } from './core/store/spatial-search-ui/spatial-search-ui.selectors';
 import { FiltersPopoverComponent } from './modules/filters/filters-popover/filters-popover.component';
 import { DrawerComponent } from './shared/components/drawer/drawer/drawer.component';
 
@@ -107,7 +107,7 @@ export class AppComponent implements OnInit {
   constructor(
     el: ElementRef<HTMLElement>, injector: Injector,
     readonly data: DataState, readonly theming: ThemingService,
-    readonly scene: SceneState, readonly listResultsState: ListResultsState,
+    readonly scene: SceneState, readonly listResultsState: ListResultsState, private readonly store: Store,
     readonly consentService: ConsentService, readonly snackbar: MatSnackBar, overlay: AppRootOverlayContainer,
     readonly dataSource: DataSourceService, private readonly globalConfig: GlobalConfigState<AppOptions>, cdr: ChangeDetectorRef
   ) {
@@ -290,7 +290,8 @@ export class AppComponent implements OnInit {
   }
 
   convertSpatialSearch(search: SpatialSearch): SpatialSearchListItem {
-    const organ = ALL_ORGANS.find((o) => o.id === search.target);
+    const organs: OrganInfo[] = this.store.selectSnapshot(SceneState.referenceOrgans);
+    const organ: OrganInfo | undefined = organs.find((o) => o.id === search.target);
     return {
       selected: true,
       description: `${search.sex}, ${organ?.name}, ${search.radius/10} cm, X: ${search.x}, Y: ${search.y}, Z: ${search.z}`
